@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <title>Questionário Psicométrico - Sistema de Ponderação Epistêmica</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- @file Questionnaire.html -->
+  <!-- @description Interface para o questionário psicométrico de 105 questões. -->
+  <!-- @module Módulo2_Formularios -->
+  <!-- @author Manus AI -->
+  <!-- @version 1.0.0 -->
+  <!-- @date 2026-03-14 -->
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
+    .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto; }
+    h2 { text-align: center; color: #333; }
+    .question { margin-bottom: 20px; padding: 15px; border-bottom: 1px solid #eee; }
+    .question p { margin: 0 0 10px 0; font-weight: bold; }
+    .scale-container { display: flex; justify-content: space-between; align-items: center; }
+    .scale-container input { width: 100%; margin: 0 10px; }
+    .scale-labels { display: flex; justify-content: space-between; font-size: 0.8em; color: #666; margin-top: 5px; }
+    button { width: 100%; padding: 15px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; margin-top: 20px; }
+    button:hover { background-color: #218838; }
+    #status { text-align: center; margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Diagnóstico Político-Econômico</h2>
+    <div id="questions-container">
+      <!-- As questões serão carregadas dinamicamente aqui -->
+    </div>
+    <button onclick="submitResponses()">Enviar Respostas</button>
+    <div id="status"></div>
+  </div>
+
+  <script>
+    window.onload = function() {
+      google.script.run.withSuccessHandler(renderQuestions).getDiagnosticQuestions();
+    };
+
+    function renderQuestions(questions) {
+      var container = document.getElementById('questions-container');
+      questions.forEach(function(q, index) {
+        var div = document.createElement('div');
+        div.className = 'question';
+        div.innerHTML = `
+          <p>${index + 1}. ${q.title}</p>
+          <div class="scale-container">
+            <span>1</span>
+            <input type="range" name="q_${q.id}" min="1" max="10" value="5">
+            <span>10</span>
+          </div>
+          <div class="scale-labels">
+            <span>Discordo Totalmente</span>
+            <span>Concordo Totalmente</span>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function submitResponses() {
+      var inputs = document.querySelectorAll('input[type="range"]');
+      var responses = {};
+      inputs.forEach(function(input) {
+        responses[input.name] = input.value;
+      });
+      
+      document.getElementById('status').innerText = 'Enviando...';
+      google.script.run.withSuccessHandler(function() {
+        document.getElementById('status').innerText = 'Enviado com sucesso!';
+        document.getElementById('status').style.color = 'green';
+      }).onFormSubmitHandler({ response: { getItemResponses: function() { 
+        // Simulação para o handler do GAS
+        return Object.keys(responses).map(key => ({
+          getItem: () => ({ getTitle: () => key }),
+          getResponse: () => responses[key]
+        }));
+      }}});
+    }
+  </script>
+</body>
+</html>

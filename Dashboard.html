@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <title>Dashboard Quinto Poder - Auditoria Epistêmica</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- @file Dashboard.html -->
+  <!-- @description Dashboard público do "Quinto Poder" para visualização de rankings de viés. -->
+  <!-- @module Módulo6_Gatilhos_QuintoPoder -->
+  <!-- @author Manus AI -->
+  <!-- @version 1.0.0 -->
+  <!-- @date 2026-03-14 -->
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #1c1e21;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      color: #1c1e21;
+      margin-top: 0;
+      font-size: 1.5em;
+      border-left: 5px solid #1877f2;
+      padding-left: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 15px;
+      border-bottom: 1px solid #e4e6eb;
+    }
+
+    th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      color: #65676b;
+    }
+
+    .score-badge {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+
+    .low-bias {
+      background-color: #e7f3ff;
+      color: #1877f2;
+    }
+
+    .high-bias {
+      background-color: #ffebe9;
+      color: #f02849;
+    }
+
+    .news-item {
+      border-bottom: 1px solid #e4e6eb;
+      padding: 15px 0;
+    }
+
+    .news-item:last-child {
+      border-bottom: none;
+    }
+
+    .news-title {
+      font-weight: bold;
+      color: #1c1e21;
+      text-decoration: none;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .news-title:hover {
+      text-decoration: underline;
+    }
+
+    .news-meta {
+      font-size: 0.85em;
+      color: #65676b;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>O Quinto Poder: Auditoria Epistêmica em Rede</h1>
+    <p>Monitoramento de viés mediático e transparência institucional do caso Banco Master</p>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <h2>Ranking de Coerência Analítica (Top 10)</h2>
+      <table id="ranking-table">
+        <thead>
+          <tr>
+            <th>Posição</th>
+            <th>ID do Perfil</th>
+            <th>Score de Viés</th>
+            <th>Status de Objetividade</th>
+          </tr>
+        </thead>
+        <tbody id="ranking-body">
+          <!-- Dados carregados via GAS -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Notícias Auditadas pela Comunidade</h2>
+      <div id="news-container">
+        <!-- Notícias carregadas via GAS -->
+      </div>
+      <div style="margin-top: 20px;">
+        <input type="text" id="news-url" placeholder="URL da Notícia"
+          style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ddd; margin-bottom: 10px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+          <div><label style="font-size:0.85em; color:#65676b;">Foco Esquerda (0-10)</label><input type="number"
+              id="focoEsq" value="0" min="0" max="10"
+              style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;"></div>
+          <div><label style="font-size:0.85em; color:#65676b;">Foco Direita (0-10)</label><input type="number"
+              id="focoDir" value="0" min="0" max="10"
+              style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;"></div>
+          <div><label style="font-size:0.85em; color:#65676b;">Omissão Esquerda (0-10)</label><input type="number"
+              id="omisEsq" value="0" min="0" max="10"
+              style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;"></div>
+          <div><label style="font-size:0.85em; color:#65676b;">Omissão Direita (0-10)</label><input type="number"
+              id="omisDir" value="0" min="0" max="10"
+              style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;"></div>
+        </div>
+        <button onclick="submitNews()"
+          style="width: 100%; padding: 10px; background-color: #1877f2; color: white; border: none; border-radius: 4px; cursor: pointer;">Submeter
+          para Auditoria</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.onload = function () {
+      loadDashboardData();
+    };
+
+    function loadDashboardData() {
+      // Simulação de carregamento de dados via GAS
+      var mockRanking = [
+        { id: 'P-9821', score: 2.5, status: 'Objetivo' },
+        { id: 'P-4432', score: 5.8, status: 'Objetivo' },
+        { id: 'P-1290', score: 12.1, status: 'Moderado' },
+        { id: 'P-7761', score: 45.3, status: 'Tendencioso' },
+        { id: 'P-3309', score: 88.7, status: 'Militante' }
+      ];
+
+      var tbody = document.getElementById('ranking-body');
+      mockRanking.forEach(function (item, index) {
+        var row = tbody.insertRow();
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${item.id}</td>
+          <td><span class="score-badge ${item.score < 10 ? 'low-bias' : 'high-bias'}">${item.score}</span></td>
+          <td>${item.status}</td>
+        `;
+      });
+
+      var mockNews = [
+        { title: 'Delação de Vorcaro implica diretores do BC', url: '#', bias: 'Moderado' },
+        { title: 'Contratos milionários de parentes de ministros no STF', url: '#', bias: 'Alto' },
+        { title: 'TCU investiga liquidante do Banco Central', url: '#', bias: 'Baixo' }
+      ];
+
+      var newsContainer = document.getElementById('news-container');
+      mockNews.forEach(function (news) {
+        var div = document.createElement('div');
+        div.className = 'news-item';
+        div.innerHTML = `
+          <a href="${news.url}" class="news-title">${news.title}</a>
+          <div class="news-meta">Viés Detectado: <strong>${news.bias}</strong></div>
+        `;
+        newsContainer.appendChild(div);
+      });
+    }
+
+    function submitNews() {
+      var url = document.getElementById('news-url').value;
+      var evals = {
+        focoEsquerda: document.getElementById('focoEsq').value,
+        focoDireita: document.getElementById('focoDir').value,
+        omissaoEsquerda: document.getElementById('omisEsq').value,
+        omissaoDireita: document.getElementById('omisDir').value
+      };
+      if (url) {
+        google.script.run.withSuccessHandler(function () {
+          alert('Notícia enviada para auditoria da comunidade!');
+          document.getElementById('news-url').value = '';
+          document.getElementById('focoEsq').value = 0;
+          document.getElementById('focoDir').value = 0;
+          document.getElementById('omisEsq').value = 0;
+          document.getElementById('omisDir').value = 0;
+        }).aggregateTendency(url, 'USER_UUID', evals);
+      }
+    }
+  </script>
+</body>
+
+</html>
